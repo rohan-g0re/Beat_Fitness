@@ -81,7 +81,7 @@ export const HomeScreen = () => {
           
           if (daysRes.data && daysRes.data.length > 0) {
             const today = new Date().getDay(); // 0 = Sunday
-            const todayDay = (daysRes.data as RoutineDay[]).find(d => d.dayOfWeek === today);
+            const todayDay = (daysRes.data as RoutineDay[]).find(d => d.day_of_week === today);
             
             if (todayDay) {
               setTodayRoutine({ routine: firstRoutine, day: todayDay });

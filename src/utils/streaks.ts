@@ -23,9 +23,9 @@ export const getWorkoutDays = (sessions: WorkoutSession[]): Set<string> => {
   const workoutDays = new Set<string>();
 
   sessions.forEach(session => {
-    if (session.endedAt) {
+    if (session.ended_at) {
       // Use ended_at to determine the workout day
-      const dateStr = toLocalDateString(session.endedAt);
+      const dateStr = toLocalDateString(session.ended_at);
       workoutDays.add(dateStr);
     }
   });
@@ -118,7 +118,7 @@ export const calculateStreaks = (sessions: WorkoutSession[]): StreakData => {
   return {
     currentStreak,
     longestStreak: Math.max(longestStreak, currentStreak),
-    totalWorkouts: sessions.filter(s => s.endedAt).length,
+    totalWorkouts: sessions.filter(s => s.ended_at).length,
   };
 };
 
@@ -135,8 +135,8 @@ export const hasWorkoutOnDate = (date: string, sessions: WorkoutSession[]): bool
  */
 export const getWorkoutCountForDate = (date: string, sessions: WorkoutSession[]): number => {
   return sessions.filter(session => {
-    if (!session.endedAt) return false;
-    return toLocalDateString(session.endedAt) === date;
+    if (!session.ended_at) return false;
+    return toLocalDateString(session.ended_at) === date;
   }).length;
 };
 
@@ -164,8 +164,8 @@ export const getWeeklyFrequency = (sessions: WorkoutSession[], weeks: number = 4
   const cutoffStr = toLocalDateString(cutoffDate.toISOString());
 
   const recentWorkouts = sessions.filter(session => {
-    if (!session.endedAt) return false;
-    const dateStr = toLocalDateString(session.endedAt);
+    if (!session.ended_at) return false;
+    const dateStr = toLocalDateString(session.ended_at);
     return dateStr >= cutoffStr;
   });
 

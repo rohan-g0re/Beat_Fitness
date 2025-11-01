@@ -5,68 +5,68 @@
 export interface Profile {
   id: string;
   email: string | null;
-  displayName: string | null;
+  display_name: string | null;
   units: 'metric' | 'imperial';
   equipment: string[];
-  createdAt: string;
+  created_at: string;
 }
 
 export interface Routine {
   id: string;
-  userId: string;
+  user_id: string;
   name: string;
-  createdAt: string;
+  created_at: string;
   days?: RoutineDay[];
 }
 
 export interface RoutineDay {
   id: string;
-  routineId: string;
-  dayOfWeek: number; // 0=Sun, 1=Mon, ..., 6=Sat
+  routine_id: string;
+  day_of_week: number; // 0=Sun, 1=Mon, ..., 6=Sat
   tags: string[];
-  createdAt: string;
+  created_at: string;
   exercises?: RoutineExercise[];
 }
 
 export interface RoutineExercise {
   id: string;
-  routineDayId: string;
+  routine_day_id: string;
   name: string;
-  targetSets: number | null;
-  targetReps: number | null;
-  targetWeight: number | null;
+  target_sets: number | null;
+  target_reps: number | null;
+  target_weight: number | null;
   notes: string | null;
-  sortOrder: number;
+  sort_order: number;
 }
 
 export interface WorkoutSession {
   id: string;
-  userId: string;
-  routineId: string | null;
-  routineDayId: string | null;
-  startedAt: string;
-  endedAt: string | null;
-  totalDurationSec: number | null;
-  strengthScore: number | null;
+  user_id: string;
+  routine_id: string | null;
+  routine_day_id: string | null;
+  started_at: string;
+  ended_at: string | null;
+  total_duration_sec: number | null;
+  strength_score: number | null;
   exercises?: WorkoutExercise[];
 }
 
 export interface WorkoutExercise {
   id: string;
-  sessionId: string;
+  session_id: string;
   name: string;
-  sortOrder: number;
+  sort_order: number;
   sets?: WorkoutSet[];
 }
 
 export interface WorkoutSet {
   id: string;
-  workoutExerciseId: string;
-  setNumber: number;
+  workout_exercise_id: string;
+  set_number: number;
   reps: number;
   weight: number | null;
   rir: number | null; // Reps in Reserve
-  completedAt: string;
+  completed_at: string;
 }
 
 export interface ExerciseTemplate {
@@ -82,11 +82,11 @@ export interface ExerciseTemplate {
 }
 
 export interface UserEntitlement {
-  userId: string;
+  user_id: string;
   pro: boolean;
-  maxRoutines: number;
-  expiresAt: string | null;
-  updatedAt: string;
+  max_routines: number;
+  expires_at: string | null;
+  updated_at: string;
 }
 
 // Stats & Analytics

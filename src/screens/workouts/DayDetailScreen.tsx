@@ -68,7 +68,7 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
         if (dayData) {
           setDay(dayData);
           navigation.setOptions({
-            title: getDayName(dayData.dayOfWeek),
+            title: getDayName(dayData.day_of_week),
           });
         }
       }
@@ -197,12 +197,12 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
               </Text>
             </View>
           ) : (
-            exercises.map((exercise) => (
+            exercises.map((exercise: any) => (
               <Card
                 key={exercise.id}
                 title={exercise.name}
-                subtitle={`${exercise.targetSets || '-'} sets × ${exercise.targetReps || '-'} reps${
-                  exercise.targetWeight ? ` @ ${exercise.targetWeight}kg` : ''
+                subtitle={`${exercise.target_sets || '-'} sets × ${exercise.target_reps || '-'} reps${
+                  exercise.target_weight ? ` @ ${exercise.target_weight}kg` : ''
                 }`}
                 variant="exercise"
                 onPress={() => {

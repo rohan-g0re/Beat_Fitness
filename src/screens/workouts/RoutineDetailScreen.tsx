@@ -53,7 +53,7 @@ export const RoutineDetailScreen = ({ route, navigation }: Props) => {
       const daysRes = await getRoutineDays(routineId);
       if (daysRes.data) {
         const daysData = (daysRes.data as RoutineDay[]).sort(
-          (a, b) => a.dayOfWeek - b.dayOfWeek
+          (a, b) => a.day_of_week - b.day_of_week
         );
         setDays(daysData);
 
@@ -104,7 +104,7 @@ export const RoutineDetailScreen = ({ route, navigation }: Props) => {
   const getFullWeek = () => {
     const fullWeek: (RoutineDay | null)[] = [];
     for (let i = 0; i < 7; i++) {
-      const day = days.find(d => d.dayOfWeek === i);
+      const day = days.find(d => d.day_of_week === i);
       fullWeek.push(day || null);
     }
     return fullWeek;
@@ -141,7 +141,7 @@ export const RoutineDetailScreen = ({ route, navigation }: Props) => {
         return (
           <Card
             key={day.id}
-            title={DAY_NAMES[day.dayOfWeek]}
+            title={DAY_NAMES[day.day_of_week]}
             subtitle={
               exerciseCount > 0
                 ? `${exerciseCount} exercise${exerciseCount !== 1 ? 's' : ''}`

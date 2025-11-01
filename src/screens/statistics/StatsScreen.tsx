@@ -68,7 +68,7 @@ export const StatsScreen = () => {
       }
 
       const sessions = sessionsData as WorkoutSession[];
-      const completedSessions = sessions.filter(s => s.endedAt);
+      const completedSessions = sessions.filter(s => s.ended_at);
 
       // Calculate streaks
       const { currentStreak, longestStreak } = calculateStreaks(sessions);
@@ -80,8 +80,8 @@ export const StatsScreen = () => {
 
       for (const session of completedSessions) {
         // Add duration
-        if (session.totalDurationSec) {
-          totalDuration += session.totalDurationSec;
+        if (session.total_duration_sec) {
+          totalDuration += session.total_duration_sec;
         }
 
         // Fetch exercises for session

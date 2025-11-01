@@ -143,13 +143,13 @@ export const useRoutinesStore = create<RoutinesState>((set, get) => ({
   getRoutineById: id => get().routines[id] || null,
 
   getDaysByRoutineId: routineId => {
-    return Object.values(get().days).filter(day => day.routineId === routineId);
+    return Object.values(get().days).filter(day => day.routine_id === routineId);
   },
 
   getExercisesByDayId: dayId => {
     return Object.values(get().exercises)
-      .filter(ex => ex.routineDayId === dayId)
-      .sort((a, b) => a.sortOrder - b.sortOrder);
+      .filter(ex => ex.routine_day_id === dayId)
+      .sort((a, b) => a.sort_order - b.sort_order);
   },
 }));
 
