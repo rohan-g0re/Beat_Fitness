@@ -145,7 +145,11 @@ export const getRoutineDays = async (routineId: string) => {
 export const upsertRoutineDay = async (
   day: Database['public']['Tables']['routine_days']['Insert']
 ) => {
-  const { data, error } = await supabase.from('routine_days').upsert(day).select().single();
+  const { data, error } = await supabase
+    .from('routine_days')
+    .upsert(day, { onConflict: 'routine_id,day_of_week' })
+    .select()
+    .single();
   return { data, error };
 };
 
