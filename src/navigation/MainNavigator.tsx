@@ -10,8 +10,8 @@ import { Ionicons } from '@expo/vector-icons';
 // Import navigators and screens
 import { HomeNavigator } from './HomeNavigator';
 import { WorkoutNavigator } from './WorkoutNavigator';
+import { SettingsNavigator } from './SettingsNavigator';
 import { StatsScreen } from '@screens/statistics/StatsScreen';
-import { SettingsScreen } from '@screens/settings/SettingsScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -60,7 +60,7 @@ export const MainNavigator = () => {
       />
       <Tab.Screen
         name="Settings"
-        component={SettingsScreen}
+        component={SettingsNavigator}
         options={{
           tabBarLabel: 'Settings',
           tabBarIcon: ({ color, size }) => (

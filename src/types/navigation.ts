@@ -19,7 +19,7 @@ export type MainTabParamList = {
   Home: NavigatorScreenParams<HomeStackParamList>;
   Workouts: NavigatorScreenParams<WorkoutsStackParamList>;
   Statistics: undefined;
-  Settings: undefined;
+  Settings: NavigatorScreenParams<SettingsStackParamList>;
 };
 
 export type HomeStackParamList = {
@@ -33,6 +33,12 @@ export type WorkoutsStackParamList = {
   RoutineDetail: { routineId: string };
   DayDetail: { routineId: string; dayId: string; isToday?: boolean };
   ActiveWorkout: { routineId?: string; dayId?: string };
+};
+
+export type SettingsStackParamList = {
+  SettingsMenu: undefined;
+  AccountInformation: undefined;
+  FAQs: undefined;
 };
 
 // Type declarations for navigation props

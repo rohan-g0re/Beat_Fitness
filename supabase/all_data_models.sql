@@ -24,11 +24,15 @@ create table if not exists public.profiles (
   display_name text,
   units text not null default 'metric' check (units in ('metric', 'imperial')),
   equipment jsonb not null default '[]'::jsonb,
+  height numeric,
+  weight numeric,
   created_at timestamptz not null default now()
 );
 
 comment on table public.profiles is 'User profiles linked 1:1 with auth.users';
 comment on column public.profiles.equipment is 'User''s available equipment (JSON array of strings)';
+comment on column public.profiles.height is 'User height in centimeters';
+comment on column public.profiles.weight is 'User weight in kilograms';
 
 -- =====================================================
 -- Routines Table

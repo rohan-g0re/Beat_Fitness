@@ -15,6 +15,8 @@ export interface Database {
           display_name: string | null;
           units: string;
           equipment: Json;
+          height: number | null;
+          weight: number | null;
           created_at: string;
         };
         Insert: {
@@ -23,6 +25,8 @@ export interface Database {
           display_name?: string | null;
           units?: string;
           equipment?: Json;
+          height?: number | null;
+          weight?: number | null;
           created_at?: string;
         };
         Update: {
@@ -31,6 +35,8 @@ export interface Database {
           display_name?: string | null;
           units?: string;
           equipment?: Json;
+          height?: number | null;
+          weight?: number | null;
           created_at?: string;
         };
       };
