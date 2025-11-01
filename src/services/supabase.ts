@@ -225,14 +225,14 @@ export const endWorkoutSession = async (
   return { data, error };
 };
 
-export const getWorkoutSessions = async (userId: string, limit = 50) => {
+export const getWorkoutSessions = async (userId: string, limit = 50, offset = 0) => {
   const { data, error } = await supabase
     .from('workout_sessions')
     .select('*')
     .eq('user_id', userId)
     .not('ended_at', 'is', null)
     .order('started_at', { ascending: false })
-    .limit(limit);
+    .range(offset, offset + limit - 1);
   return { data, error };
 };
 

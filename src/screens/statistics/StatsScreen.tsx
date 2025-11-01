@@ -10,8 +10,11 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { StatisticsStackParamList } from '@types/navigation';
 import { colors } from '@theme/colors';
 import { spacing, borderRadius } from '@theme/spacing';
 import { typography } from '@theme/typography';
@@ -31,8 +34,11 @@ interface StatsData {
   longestStreak: number;
 }
 
+type NavigationProp = NativeStackNavigationProp<StatisticsStackParamList>;
+
 export const StatsScreen = () => {
   const { userId, initialized } = useCurrentUser();
+  const navigation = useNavigation<NavigationProp>();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<StatsData>({
     totalWorkouts: 0,
@@ -137,14 +143,34 @@ export const StatsScreen = () => {
     return num.toString();
   };
 
-  const renderStatCard = (label: string, value: string | number, color: string, icon?: string) => (
-    <View style={styles.statCard}>
-      <Text style={styles.statValue}>
-        {typeof value === 'number' ? formatNumber(value) : value}
-      </Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
+  const renderStatCard = (
+    label: string,
+    value: string | number,
+    color: string,
+    icon?: string,
+    onPress?: () => void
+  ) => {
+    const cardContent = (
+      <>
+        <Text style={styles.statValue}>
+          {typeof value === 'number' ? formatNumber(value) : value}
+        </Text>
+        <Text style={styles.statLabel}>{label}</Text>
+      </>
+    );
+
+    const cardStyle = onPress ? styles.statCardPressable : styles.statCard;
+
+    if (onPress) {
+      return (
+        <Pressable onPress={onPress} style={cardStyle}>
+          {cardContent}
+        </Pressable>
+      );
+    }
+
+    return <View style={cardStyle}>{cardContent}</View>;
+  };
 
   if (loading) {
     return (
@@ -161,7 +187,13 @@ export const StatsScreen = () => {
 
       {/* Main Stats Grid */}
       <View style={styles.statsGrid}>
-        {renderStatCard('Workouts', stats.totalWorkouts, colors.primary[500])}
+        {renderStatCard(
+          'Workouts',
+          stats.totalWorkouts,
+          colors.primary[500],
+          undefined,
+          () => navigation.navigate('WorkoutSummary')
+        )}
         {renderStatCard('Total Sets', stats.totalSets, colors.accent[500])}
       </View>
 
@@ -233,6 +265,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   statCard: {
+    flex: 1,
+    backgroundColor: '#1C1C1E',
+    padding: spacing.md,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 100,
+  },
+  statCardPressable: {
     flex: 1,
     backgroundColor: '#1C1C1E',
     padding: spacing.md,

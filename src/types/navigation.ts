@@ -18,7 +18,7 @@ export type AuthStackParamList = {
 export type MainTabParamList = {
   Home: NavigatorScreenParams<HomeStackParamList>;
   Workouts: NavigatorScreenParams<WorkoutsStackParamList>;
-  Statistics: undefined;
+  Statistics: NavigatorScreenParams<StatisticsStackParamList>;
   Settings: NavigatorScreenParams<SettingsStackParamList>;
 };
 
@@ -39,6 +39,11 @@ export type SettingsStackParamList = {
   SettingsMenu: undefined;
   AccountInformation: undefined;
   FAQs: undefined;
+};
+
+export type StatisticsStackParamList = {
+  StatsScreen: undefined;
+  WorkoutSummary: undefined;
 };
 
 // Type declarations for navigation props

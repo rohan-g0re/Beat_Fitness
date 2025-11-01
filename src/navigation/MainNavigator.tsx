@@ -4,14 +4,14 @@
 
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { MainTabParamList } from '@types/navigation';
+import { MainTabParamList } from '@/types/navigation';
 import { Ionicons } from '@expo/vector-icons';
 
 // Import navigators and screens
 import { HomeNavigator } from './HomeNavigator';
 import { WorkoutNavigator } from './WorkoutNavigator';
 import { SettingsNavigator } from './SettingsNavigator';
-import { StatsScreen } from '@screens/statistics/StatsScreen';
+import { StatisticsNavigator } from './StatisticsNavigator';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -57,7 +57,7 @@ export const MainNavigator = () => {
       />
       <Tab.Screen
         name="Statistics"
-        component={StatsScreen}
+        component={StatisticsNavigator}
         options={{
           tabBarLabel: 'Stats',
           tabBarIcon: ({ color, size }) => (
