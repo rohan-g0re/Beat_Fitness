@@ -9,9 +9,27 @@ import { WorkoutSession, WorkoutExercise, WorkoutSet } from '@types/models';
 
 interface ActiveWorkout {
   sessionId: string;
+  routineId?: string;
+  routineDayId?: string;
   startedAt: string;
+  exercises: Array<{
+    id: string;
+    name: string;
+    sortOrder: number;
+    targetSets?: number | null;
+    targetReps?: number | null;
+    targetWeight?: number | null;
+    sets: Array<{
+      id: string;
+      setNumber: number;
+      reps: number;
+      weight?: number | null;
+      rir?: number | null;
+      completedAt: string;
+    }>;
+    isDone: boolean;
+  }>;
   currentExerciseId: string | null;
-  exercises: WorkoutExercise[];
   isPaused: boolean;
   pausedAt: string | null;
 }
@@ -25,14 +43,15 @@ interface WorkoutState {
     sessionId: string,
     routineId?: string,
     dayId?: string,
-    exercises?: WorkoutExercise[]
+    exercises?: ActiveWorkout['exercises']
   ) => void;
   endWorkout: () => void;
   pauseWorkout: () => void;
   resumeWorkout: () => void;
   setCurrentExercise: (exerciseId: string | null) => void;
-  addSet: (exerciseId: string, set: WorkoutSet) => void;
-  updateExercises: (exercises: WorkoutExercise[]) => void;
+  addSet: (exerciseId: string, set: ActiveWorkout['exercises'][0]['sets'][0]) => void;
+  toggleExerciseDone: (exerciseId: string) => void;
+  updateExercises: (exercises: ActiveWorkout['exercises']) => void;
   clearWorkout: () => void;
 }
 
@@ -46,6 +65,8 @@ export const useWorkoutStore = create<WorkoutState>()(
         set({
           activeSession: {
             sessionId,
+            routineId,
+            routineDayId: dayId,
             startedAt: new Date().toISOString(),
             currentExerciseId: exercises[0]?.id || null,
             exercises,
@@ -101,7 +122,7 @@ export const useWorkoutStore = create<WorkoutState>()(
         }
       },
 
-      addSet: (exerciseId, set) => {
+      addSet: (exerciseId, newSet) => {
         const { activeSession } = get();
         if (!activeSession) return;
 
@@ -109,7 +130,29 @@ export const useWorkoutStore = create<WorkoutState>()(
           if (ex.id === exerciseId) {
             return {
               ...ex,
-              sets: [...(ex.sets || []), set],
+              sets: [...(ex.sets || []), newSet],
+            };
+          }
+          return ex;
+        });
+
+        set({
+          activeSession: {
+            ...activeSession,
+            exercises,
+          },
+        });
+      },
+
+      toggleExerciseDone: exerciseId => {
+        const { activeSession } = get();
+        if (!activeSession) return;
+
+        const exercises = activeSession.exercises.map(ex => {
+          if (ex.id === exerciseId) {
+            return {
+              ...ex,
+              isDone: !ex.isDone,
             };
           }
           return ex;

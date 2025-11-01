@@ -184,7 +184,7 @@ export interface Database {
           reps: number;
           weight?: number | null;
           rir?: number | null;
-          completed_at: string;
+          completed_at?: string; // Optional - DB default is now()
         };
         Update: {
           id?: string;

@@ -11,6 +11,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { colors } from '@theme/colors';
 import { spacing, borderRadius } from '@theme/spacing';
 import { typography } from '@theme/typography';
@@ -48,6 +49,14 @@ export const StatsScreen = () => {
       loadStats();
     }
   }, [initialized]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (userId) {
+        loadStats();
+      }
+    }, [userId])
+  );
 
   const loadStats = async () => {
     try {

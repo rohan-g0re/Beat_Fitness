@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
   Pressable,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '@types/navigation';
 import { Card } from '@components/Card';
@@ -49,6 +49,14 @@ export const HomeScreen = () => {
       loadData();
     }
   }, [initialized]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (userId) {
+        loadData();
+      }
+    }, [userId])
+  );
 
   const loadData = async () => {
     try {

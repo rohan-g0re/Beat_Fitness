@@ -17,6 +17,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { WorkoutsStackParamList, HomeStackParamList } from '../../types/navigation';
@@ -31,8 +32,12 @@ import {
   getRoutineDays,
   updateRoutineExercise,
   deleteRoutineExercise,
+  createWorkoutSession,
+  createWorkoutExercise,
 } from '@services/supabase';
 import { useRoutinesStore } from '@store/routinesStore';
+import { useWorkoutStore } from '@store/workoutStore';
+import { useCurrentUser } from '@hooks/useCurrentUser';
 import type { RoutineExercise, RoutineDay } from '../../types/models';
 
 type Props =
@@ -48,6 +53,7 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
   const [showManualForm, setShowManualForm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingExercise, setEditingExercise] = useState<RoutineExercise | null>(null);
+  const [startingWorkout, setStartingWorkout] = useState(false);
 
   // Form state
   const [exerciseName, setExerciseName] = useState('');
@@ -57,6 +63,8 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
   const [submitting, setSubmitting] = useState(false);
 
   const { addExercise } = useRoutinesStore();
+  const { startWorkout, activeSession } = useWorkoutStore();
+  const { userId } = useCurrentUser();
 
   useEffect(() => {
     loadData();
@@ -217,6 +225,81 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
     );
   };
 
+  const handleStartWorkout = async () => {
+    if (!userId) {
+      Alert.alert('Error', 'Please sign in to start a workout');
+      return;
+    }
+
+    if (exercises.length === 0) {
+      Alert.alert('No Exercises', 'Please add exercises before starting a workout');
+      return;
+    }
+
+    setStartingWorkout(true);
+    try {
+      const { data: session, error: sessionError } = await createWorkoutSession({
+        user_id: userId,
+        routine_id: routineId,
+        routine_day_id: dayId,
+        started_at: new Date().toISOString(),
+      });
+
+      if (sessionError || !session) {
+        Alert.alert('Error', 'Could not start workout');
+        console.error('Session creation error:', sessionError);
+        return;
+      }
+
+      const sessionId = (session as any).id as string;
+
+      const createdExercises = await Promise.all(
+        exercises.map((rx) =>
+          createWorkoutExercise({
+            session_id: sessionId,
+            name: rx.name,
+            sort_order: rx.sort_order,
+          })
+        )
+      );
+
+      const exerciseList = createdExercises
+        .map((res, i) => {
+          if (!res.data) return null;
+          const data = res.data as any;
+          return {
+            id: data.id as string,
+            name: data.name as string,
+            sortOrder: data.sort_order as number,
+            targetSets: exercises[i].target_sets,
+            targetReps: exercises[i].target_reps,
+            targetWeight: exercises[i].target_weight,
+            sets: [],
+            isDone: false,
+          };
+        })
+        .filter((ex): ex is NonNullable<typeof ex> => ex !== null);
+
+      startWorkout(sessionId, routineId, dayId, exerciseList);
+
+      // Navigate to ActiveWorkout
+      if ('navigate' in navigation) {
+        (navigation as any).navigate('ActiveWorkout');
+      }
+    } catch (error) {
+      console.error('Failed to start workout:', error);
+      Alert.alert('Error', 'Could not start workout');
+    } finally {
+      setStartingWorkout(false);
+    }
+  };
+
+  const handleResumeWorkout = () => {
+    if ('navigate' in navigation) {
+      (navigation as any).navigate('ActiveWorkout');
+    }
+  };
+
   const renderBanner = () => {
     if (!day) return null;
 
@@ -293,6 +376,32 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
             ))
           )}
         </View>
+
+        {/* Start Workout Button */}
+        {exercises.length > 0 && (
+          <View style={styles.workoutButtonContainer}>
+            {activeSession?.routineDayId === dayId ? (
+              <TouchableOpacity
+                style={styles.startWorkoutButton}
+                onPress={handleResumeWorkout}
+              >
+                <Text style={styles.startWorkoutButtonText}>Resume Workout</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={[styles.startWorkoutButton, startingWorkout && { opacity: 0.6 }]}
+                onPress={handleStartWorkout}
+                disabled={startingWorkout}
+              >
+                {startingWorkout ? (
+                  <ActivityIndicator color="#000000" />
+                ) : (
+                  <Text style={styles.startWorkoutButtonText}>Start Workout</Text>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       </ScrollView>
 
       {/* FAB - Add Exercise */}
@@ -847,5 +956,22 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
     color: colors.error.main,
+  },
+  workoutButtonContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.md,
+  },
+  startWorkoutButton: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 18,
+    borderRadius: 4,
+    alignItems: 'center',
+  },
+  startWorkoutButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
 });
