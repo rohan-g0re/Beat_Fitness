@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { WorkoutsStackParamList } from '@types/navigation';
+import { WorkoutsStackParamList } from '@/types/navigation';
 import { Card } from '@components/Card';
 import { colors } from '@theme/colors';
 import { spacing, borderRadius } from '@theme/spacing';
@@ -27,8 +27,9 @@ import { typography } from '@theme/typography';
 import { Ionicons } from '@expo/vector-icons';
 import { getRoutines, getRoutineDays, createRoutine, updateRoutine, deleteRoutine } from '@services/supabase';
 import { useRoutinesStore } from '@store/routinesStore';
-import { Routine, RoutineDay } from '@types/models';
+import { Routine, RoutineDay } from '@/types/models';
 import { useCurrentUser } from '@hooks/useCurrentUser';
+import { ScreenHeader } from '@components/ScreenHeader';
 
 type NavigationProp = NativeStackNavigationProp<WorkoutsStackParamList>;
 
@@ -224,7 +225,7 @@ export const RoutinesScreen = () => {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Your Routines</Text>
+        <ScreenHeader title="Your Routines" />
 
         {routines.length === 0 ? (
           <View style={styles.emptyState}>
@@ -436,13 +437,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    padding: spacing.md,
-  },
-  title: {
-    fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.lg,
+    paddingHorizontal: 32,
+    paddingTop: 24,
+    paddingBottom: 32,
   },
   emptyState: {
     flex: 1,

@@ -17,18 +17,13 @@ export const HomeNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: '#1C1C1E',
-        },
-        headerTintColor: '#FFFFFF',
+        headerShown: false,
         animation: 'slide_from_right',
       }}
     >
       <Stack.Screen
         name="HomeScreen"
         component={HomeScreen}
-        options={{ title: 'Home' }}
       />
       <Stack.Screen
         name="SessionDetail"

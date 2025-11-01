@@ -18,18 +18,13 @@ export const WorkoutNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: '#1C1C1E',
-        },
-        headerTintColor: '#FFFFFF',
+        headerShown: false,
         animation: 'slide_from_right',
       }}
     >
       <Stack.Screen
         name="RoutinesList"
         component={RoutinesScreen}
-        options={{ title: 'Routines' }}
       />
       <Stack.Screen
         name="RoutineDetail"

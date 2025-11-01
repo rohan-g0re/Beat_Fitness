@@ -15,15 +15,16 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { HomeStackParamList } from '@types/navigation';
+import { HomeStackParamList } from '@/types/navigation';
 import { Card } from '@components/Card';
+import { ScreenHeader } from '@components/ScreenHeader';
 import { colors } from '@theme/colors';
 import { spacing, borderRadius } from '@theme/spacing';
 import { typography } from '@theme/typography';
 import { useRoutinesStore } from '@store/routinesStore';
 import { getWorkoutSessions, getRoutines, getRoutineDays } from '@services/supabase';
 import { calculateStreaks, getWorkoutDatesForMonth, toLocalDateString } from '@utils/streaks';
-import { WorkoutSession, Routine, RoutineDay } from '@types/models';
+import { WorkoutSession, Routine, RoutineDay } from '@/types/models';
 import { useCurrentUser } from '@hooks/useCurrentUser';
 
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
@@ -203,6 +204,8 @@ export const HomeScreen = () => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScreenHeader title="Home" />
+
       {/* Streaks Section */}
       <View style={styles.streaksContainer}>
         <View style={styles.streakCard}>
@@ -262,7 +265,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 32,
-    paddingTop: 16,
+    paddingTop: 24,
     paddingBottom: 32,
   },
   streaksContainer: {

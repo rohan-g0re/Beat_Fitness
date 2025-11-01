@@ -14,15 +14,16 @@ import {
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { StatisticsStackParamList } from '@types/navigation';
+import { StatisticsStackParamList } from '@/types/navigation';
 import { colors } from '@theme/colors';
 import { spacing, borderRadius } from '@theme/spacing';
 import { typography } from '@theme/typography';
 import { getWorkoutSessions, getWorkoutExercises, getWorkoutSets } from '@services/supabase';
 import { calculateStreaks } from '@utils/streaks';
 import { calculateTotalVolume, calculateTotalReps } from '@utils/fitness';
-import { WorkoutSession, WorkoutSet } from '@types/models';
+import { WorkoutSession, WorkoutSet } from '@/types/models';
 import { useCurrentUser } from '@hooks/useCurrentUser';
+import { ScreenHeader } from '@components/ScreenHeader';
 
 interface StatsData {
   totalWorkouts: number;
@@ -182,7 +183,7 @@ export const StatsScreen = () => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Statistics</Text>
+      <ScreenHeader title="Statistics" />
       <Text style={styles.subtitle}>Your workout performance at a glance</Text>
 
       {/* Main Stats Grid */}
@@ -244,15 +245,8 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 32,
-    paddingTop: 16,
+    paddingTop: 24,
     paddingBottom: 32,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    letterSpacing: -0.5,
-    color: '#FFFFFF',
-    marginBottom: spacing.xs,
   },
   subtitle: {
     fontSize: 16,

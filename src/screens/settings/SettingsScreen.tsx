@@ -11,7 +11,8 @@ import { colors } from '@theme/colors';
 import { spacing, borderRadius } from '@theme/spacing';
 import { typography } from '@theme/typography';
 import { useAuth } from '@hooks/useAuth';
-import { SettingsStackParamList } from '@types/navigation';
+import { SettingsStackParamList } from '@/types/navigation';
+import { ScreenHeader } from '@components/ScreenHeader';
 
 type NavigationProp = NativeStackNavigationProp<SettingsStackParamList>;
 
@@ -42,6 +43,8 @@ export const SettingsScreen = () => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScreenHeader title="Settings" />
+
       {/* Account Information Card */}
       <Pressable
         style={styles.card}
@@ -92,7 +95,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.dark,
   },
   content: {
-    padding: spacing.lg,
+    paddingHorizontal: 32,
+    paddingTop: 24,
     paddingBottom: spacing.xl * 2,
   },
   card: {

@@ -63,15 +63,6 @@ export const MainNavigator = () => {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="stats-chart-outline" size={size} color={color} />
           ),
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: '#1C1C1E',
-          },
-          headerTintColor: '#FFFFFF',
-          headerTitleStyle: {
-            fontWeight: '600',
-          },
-          title: 'Statistics',
         }}
       />
       <Tab.Screen

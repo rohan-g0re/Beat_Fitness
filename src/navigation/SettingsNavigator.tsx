@@ -15,10 +15,7 @@ export const SettingsNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: '#1C1C1E',
-        },
+        headerShown: false,
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: '600',
@@ -30,9 +27,6 @@ export const SettingsNavigator = () => {
       <Stack.Screen
         name="SettingsMenu"
         component={SettingsScreen}
-        options={{
-          title: 'Settings',
-        }}
       />
       <Stack.Screen
         name="AccountInformation"
