@@ -99,6 +99,15 @@ export const getRoutines = async (userId: string) => {
   return { data, error };
 };
 
+export const getRoutine = async (routineId: string) => {
+  const { data, error } = await supabase
+    .from('routines')
+    .select('*')
+    .eq('id', routineId)
+    .single();
+  return { data, error };
+};
+
 export const createRoutine = async (routine: Database['public']['Tables']['routines']['Insert']) => {
   const { data, error } = await supabase.from('routines').insert(routine).select().single();
   return { data, error };

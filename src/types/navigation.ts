@@ -25,12 +25,13 @@ export type MainTabParamList = {
 export type HomeStackParamList = {
   HomeScreen: undefined;
   SessionDetail: { sessionId: string };
+  DayDetail: { routineId: string; dayId: string; isToday?: boolean };
 };
 
 export type WorkoutsStackParamList = {
   RoutinesList: undefined;
   RoutineDetail: { routineId: string };
-  DayDetail: { routineId: string; dayId: string };
+  DayDetail: { routineId: string; dayId: string; isToday?: boolean };
   ActiveWorkout: { routineId?: string; dayId?: string };
 };
 

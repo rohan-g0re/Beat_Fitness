@@ -5,6 +5,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MainTabParamList } from '@types/navigation';
+import { Ionicons } from '@expo/vector-icons';
 
 // Import navigators and screens
 import { HomeNavigator } from './HomeNavigator';
@@ -12,7 +13,6 @@ import { WorkoutNavigator } from './WorkoutNavigator';
 import { StatsScreen } from '@screens/statistics/StatsScreen';
 import { SettingsScreen } from '@screens/settings/SettingsScreen';
 
-// TODO: Replace with proper icons from @expo/vector-icons
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export const MainNavigator = () => {
@@ -33,7 +33,9 @@ export const MainNavigator = () => {
         component={HomeNavigator}
         options={{
           tabBarLabel: 'Home',
-          // tabBarIcon: ({ color, size }) => <Icon name="home" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -41,7 +43,9 @@ export const MainNavigator = () => {
         component={WorkoutNavigator}
         options={{
           tabBarLabel: 'Workouts',
-          // tabBarIcon: ({ color, size }) => <Icon name="dumbbell" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="barbell-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -49,7 +53,9 @@ export const MainNavigator = () => {
         component={StatsScreen}
         options={{
           tabBarLabel: 'Stats',
-          // tabBarIcon: ({ color, size }) => <Icon name="chart-line" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="stats-chart-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -57,7 +63,9 @@ export const MainNavigator = () => {
         component={SettingsScreen}
         options={{
           tabBarLabel: 'Settings',
-          // tabBarIcon: ({ color, size }) => <Icon name="cog" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={size} color={color} />
+          ),
         }}
       />
     </Tab.Navigator>

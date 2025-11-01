@@ -6,7 +6,64 @@
 
 ## 🔧 Active Development Changes
 
-### 1. **Authentication Bypass for Testing** *(Added: 2025-11-01)*
+### 1. **Figma-Accurate Tab Implementation** *(Added: 2025-11-01)*
+
+**Location**: `src/screens/*`, `src/components/*`, `src/navigation/*`
+
+**Change**:
+- Implemented Home, Workouts, and Statistics tabs matching Figma designs (Frame 1:2, 1:13, 1:19)
+- Created reusable Card component for routines, days, exercises, and workout cards
+- Built inline calendar with workout dots and streak counters in HomeScreen
+- Implemented shared DayDetailScreen with banner, exercise list, and Add Exercise functionality
+- Added RoutinesScreen and RoutineDetailScreen with Mon-Sun day cards
+- Implemented StatsScreen with aggregate stat cards (workouts, sets, reps, volume, duration, streaks)
+- Updated MainNavigator with proper Ionicons tab icons
+- Added DayDetail to both Home and Workouts navigation stacks for shared access
+
+**Key Features**:
+- Calendar shows workout days with dots and current/longest streak
+- Today's Workout card navigates to day detail with exercises
+- Add Exercise modal with Manual/AI options (AI coming soon)
+- Manual exercise form with name, sets, reps, weight fields
+- All screens scrollable and matching Figma spacing/typography
+- Navigation flows: Home → Today's Workout, Workouts → Routine → Day → Exercises
+
+**Real Auth Integration** *(Updated: 2025-11-01)*:
+- ✅ Created `useCurrentUser` hook to access authenticated user ID
+- ✅ All screens now use real authenticated user from Supabase auth
+- ✅ HomeScreen, RoutinesScreen, StatsScreen, DayDetailScreen use real user IDs
+- ✅ RLS policies now work correctly with authenticated users
+- ✅ Create routine functionality works with real user context
+
+**Temporary Implementations**:
+- Placeholder banner images in DayDetailScreen (structure ready for actual images via `getBannerImage()` function)
+- Create routine modal implemented with bottom sheet form
+- Stats chart placeholder (charting library to be added)
+
+**Action Before Production**:
+- [ ] Add banner images or image picker for day cards
+- [ ] Add charting library for strength score trendline
+- [ ] Implement AI exercise suggestions
+- [ ] Add comprehensive error handling for network failures
+- [ ] Test edge cases (empty states, offline mode, etc.)
+
+**Files Changed**:
+- `src/hooks/useCurrentUser.ts` (NEW) - Hook to access authenticated user ID
+- `src/components/Card.tsx` (NEW)
+- `src/components/index.ts` (NEW)
+- `src/screens/home/HomeScreen.tsx` (REWRITE - uses real auth)
+- `src/screens/workouts/DayDetailScreen.tsx` (REWRITE)
+- `src/screens/workouts/RoutinesScreen.tsx` (REWRITE - uses real auth)
+- `src/screens/workouts/RoutineDetailScreen.tsx` (REWRITE)
+- `src/screens/statistics/StatsScreen.tsx` (REWRITE - uses real auth)
+- `src/navigation/MainNavigator.tsx` (UPDATE)
+- `src/navigation/HomeNavigator.tsx` (UPDATE)
+- `src/types/navigation.ts` (UPDATE)
+- `src/services/supabase.ts` (ADD getRoutine function)
+
+---
+
+### 2. **Authentication Bypass for Testing** *(Added: 2025-11-01)*
 
 **Location**: `src/hooks/useAuth.ts` + `src/screens/auth/SignInScreen.tsx`
 

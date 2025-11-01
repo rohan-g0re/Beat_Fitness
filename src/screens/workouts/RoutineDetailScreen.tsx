@@ -1,22 +1,138 @@
 /**
- * RoutineDetailScreen - Days grid (Mon-Sun cards)
+ * RoutineDetailScreen - Display Mon-Sun day cards for a routine
+ * Reference: Figma Frame 1:19 Screen 2
  */
 
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { WorkoutsStackParamList } from '@types/navigation';
+import { Card } from '@components/Card';
+import { colors } from '@theme/colors';
+import { spacing } from '@theme/spacing';
+import { typography } from '@theme/typography';
+import { getRoutine, getRoutineDays, getRoutineExercises } from '@services/supabase';
+import { Routine, RoutineDay } from '@types/models';
 
 type Props = NativeStackScreenProps<WorkoutsStackParamList, 'RoutineDetail'>;
 
-export const RoutineDetailScreen = ({ route }: Props) => {
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+export const RoutineDetailScreen = ({ route, navigation }: Props) => {
   const { routineId } = route.params;
+  const [loading, setLoading] = useState(true);
+  const [routine, setRoutine] = useState<Routine | null>(null);
+  const [days, setDays] = useState<RoutineDay[]>([]);
+  const [exerciseCounts, setExerciseCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    loadRoutineData();
+  }, [routineId]);
+
+  const loadRoutineData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch routine details
+      const routineRes = await getRoutine(routineId);
+      if (routineRes.data) {
+        const routineData = routineRes.data as Routine;
+        setRoutine(routineData);
+        navigation.setOptions({
+          title: routineData.name,
+        });
+      }
+
+      // Fetch days
+      const daysRes = await getRoutineDays(routineId);
+      if (daysRes.data) {
+        const daysData = (daysRes.data as RoutineDay[]).sort(
+          (a, b) => a.dayOfWeek - b.dayOfWeek
+        );
+        setDays(daysData);
+
+        // Count exercises for each day
+        const counts: Record<string, number> = {};
+        for (const day of daysData) {
+          const exercisesRes = await getRoutineExercises(day.id);
+          counts[day.id] = exercisesRes.data?.length || 0;
+        }
+        setExerciseCounts(counts);
+      }
+    } catch (error) {
+      console.error('Error loading routine data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create full week array with placeholders for missing days
+  const getFullWeek = () => {
+    const fullWeek: (RoutineDay | null)[] = [];
+    for (let i = 0; i < 7; i++) {
+      const day = days.find(d => d.dayOfWeek === i);
+      fullWeek.push(day || null);
+    }
+    return fullWeek;
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary[500]} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Routine Details</Text>
-      <Text style={styles.subtitle}>Routine ID: {routineId}</Text>
-      <Text style={styles.subtitle}>TODO: Display Mon-Sun day cards</Text>
+      <Text style={styles.subtitle}>Select a day to view or edit exercises</Text>
+
+      {getFullWeek().map((day, index) => {
+        if (!day) {
+          // Empty day slot
+          return (
+            <Card
+              key={`empty-${index}`}
+              title={DAY_NAMES[index]}
+              subtitle="Rest day"
+              variant="day"
+              onPress={() => {
+                // TODO: Create day or mark as active
+                console.log('Create day for', DAY_NAMES[index]);
+              }}
+            />
+          );
+        }
+
+        const exerciseCount = exerciseCounts[day.id] || 0;
+
+        return (
+          <Card
+            key={day.id}
+            title={DAY_NAMES[day.dayOfWeek]}
+            subtitle={
+              exerciseCount > 0
+                ? `${exerciseCount} exercise${exerciseCount !== 1 ? 's' : ''}`
+                : 'No exercises yet'
+            }
+            tags={day.tags}
+            variant="day"
+            onPress={() => {
+              navigation.navigate('DayDetail', {
+                routineId,
+                dayId: day.id,
+              });
+            }}
+          />
+        );
+      })}
     </ScrollView>
   );
 };
@@ -24,21 +140,20 @@ export const RoutineDetailScreen = ({ route }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: colors.background.dark,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: colors.background.dark,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
-    padding: 16,
-  },
-  title: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    padding: spacing.md,
   },
   subtitle: {
-    color: '#6E6E6E',
-    fontSize: 14,
-    marginTop: 4,
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    marginBottom: spacing.lg,
   },
 });
-
