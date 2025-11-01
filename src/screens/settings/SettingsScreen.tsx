@@ -42,8 +42,6 @@ export const SettingsScreen = () => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.mainTitle}>Settings</Text>
-
       {/* Account Information Card */}
       <Pressable
         style={styles.card}
@@ -96,12 +94,6 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xl * 2,
-  },
-  mainTitle: {
-    color: colors.text.primary,
-    fontSize: typography.fontSize.xxl,
-    fontWeight: typography.fontWeight.bold,
-    marginBottom: spacing.xl,
   },
   card: {
     backgroundColor: colors.background.elevated,
