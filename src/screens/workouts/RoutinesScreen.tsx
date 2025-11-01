@@ -14,6 +14,8 @@ import {
   Modal,
   TextInput,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -199,55 +201,58 @@ export const RoutinesScreen = () => {
         animationType="slide"
         onRequestClose={() => setShowCreateModal(false)}
       >
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setShowCreateModal(false)}
-        >
-          <Pressable style={styles.modalContent} onPress={() => {}}>
-            <View style={styles.modalHandle} />
-            
-            <Text style={styles.modalTitle}>Create New Routine</Text>
+        <Pressable style={styles.modalOverlay} onPress={() => setShowCreateModal(false)}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+          >
+            <Pressable style={styles.modalContent} onPress={() => {}}>
+              <View style={styles.modalHandle} />
 
-            <View style={styles.formField}>
-              <Text style={styles.formLabel}>Routine Name *</Text>
-              <TextInput
-                style={styles.formInput}
-                value={routineName}
-                onChangeText={setRoutineName}
-                placeholder="e.g., Push Pull Legs"
-                placeholderTextColor={colors.text.disabled}
-                autoFocus
-              />
-            </View>
+              <Text style={styles.modalTitle}>Create New Routine</Text>
 
-            <View style={styles.modalButtons}>
-              <Pressable
-                style={[styles.modalButton, styles.modalButtonSecondary]}
-                onPress={() => {
-                  setRoutineName('');
-                  setShowCreateModal(false);
-                }}
-              >
-                <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
-              </Pressable>
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Routine Name *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={routineName}
+                  onChangeText={setRoutineName}
+                  placeholder="e.g., Push Pull Legs"
+                  placeholderTextColor={colors.text.disabled}
+                  autoFocus
+                  returnKeyType="done"
+                />
+              </View>
 
-              <Pressable
-                style={[
-                  styles.modalButton,
-                  styles.modalButtonPrimary,
-                  (!routineName.trim() || creating) && styles.modalButtonDisabled,
-                ]}
-                onPress={handleCreateRoutine}
-                disabled={!routineName.trim() || creating}
-              >
-                {creating ? (
-                  <ActivityIndicator size="small" color={colors.text.primary} />
-                ) : (
-                  <Text style={styles.modalButtonPrimaryText}>Create</Text>
-                )}
-              </Pressable>
-            </View>
-          </Pressable>
+              <View style={styles.modalButtons}>
+                <Pressable
+                  style={[styles.modalButton, styles.modalButtonSecondary]}
+                  onPress={() => {
+                    setRoutineName('');
+                    setShowCreateModal(false);
+                  }}
+                >
+                  <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                </Pressable>
+
+                <Pressable
+                  style={[
+                    styles.modalButton,
+                    styles.modalButtonPrimary,
+                    (!routineName.trim() || creating) && styles.modalButtonDisabled,
+                  ]}
+                  onPress={handleCreateRoutine}
+                  disabled={!routineName.trim() || creating}
+                >
+                  {creating ? (
+                    <ActivityIndicator size="small" color={colors.text.primary} />
+                  ) : (
+                    <Text style={styles.modalButtonPrimaryText}>Create</Text>
+                  )}
+                </Pressable>
+              </View>
+            </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
     </View>

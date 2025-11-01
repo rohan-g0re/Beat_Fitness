@@ -14,9 +14,11 @@ import {
   TextInput,
   ActivityIndicator,
   Image,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { WorkoutsStackParamList, HomeStackParamList } from '@types/navigation';
+import type { WorkoutsStackParamList, HomeStackParamList } from '../../types/navigation';
 import { Card } from '@components/Card';
 import { colors } from '@theme/colors';
 import { spacing, borderRadius } from '@theme/spacing';
@@ -28,7 +30,7 @@ import {
   getRoutineDays,
 } from '@services/supabase';
 import { useRoutinesStore } from '@store/routinesStore';
-import { RoutineExercise, RoutineDay } from '@types/models';
+import type { RoutineExercise, RoutineDay } from '../../types/models';
 
 type Props =
   | NativeStackScreenProps<WorkoutsStackParamList, 'DayDetail'>
@@ -272,91 +274,102 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
         animationType="slide"
         onRequestClose={() => setShowManualForm(false)}
       >
-        <Pressable
-          style={styles.formOverlay}
-          onPress={() => setShowManualForm(false)}
-        >
-          <Pressable style={styles.formContent} onPress={() => {}}>
-            <View style={styles.formHandle} />
-            
-            <Text style={styles.formTitle}>Add Exercise Manually</Text>
+        <Pressable style={styles.formOverlay} onPress={() => setShowManualForm(false)}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+          >
+            <Pressable style={styles.formContent} onPress={() => {}}>
+              <View style={styles.formHandle} />
 
-            <View style={styles.formFields}>
-              <View style={styles.formField}>
-                <Text style={styles.formLabel}>Exercise Name *</Text>
-                <TextInput
-                  style={styles.formInput}
-                  value={exerciseName}
-                  onChangeText={setExerciseName}
-                  placeholder="e.g., Bench Press"
-                  placeholderTextColor={colors.text.disabled}
-                />
-              </View>
-
-              <View style={styles.formRow}>
-                <View style={[styles.formField, { flex: 1 }]}>
-                  <Text style={styles.formLabel}>Sets</Text>
-                  <TextInput
-                    style={styles.formInput}
-                    value={targetSets}
-                    onChangeText={setTargetSets}
-                    placeholder="3"
-                    keyboardType="number-pad"
-                    placeholderTextColor={colors.text.disabled}
-                  />
-                </View>
-
-                <View style={[styles.formField, { flex: 1 }]}>
-                  <Text style={styles.formLabel}>Reps</Text>
-                  <TextInput
-                    style={styles.formInput}
-                    value={targetReps}
-                    onChangeText={setTargetReps}
-                    placeholder="10"
-                    keyboardType="number-pad"
-                    placeholderTextColor={colors.text.disabled}
-                  />
-                </View>
-
-                <View style={[styles.formField, { flex: 1 }]}>
-                  <Text style={styles.formLabel}>Weight (kg)</Text>
-                  <TextInput
-                    style={styles.formInput}
-                    value={targetWeight}
-                    onChangeText={setTargetWeight}
-                    placeholder="50"
-                    keyboardType="decimal-pad"
-                    placeholderTextColor={colors.text.disabled}
-                  />
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.formButtons}>
-              <Pressable
-                style={[styles.formButton, styles.formButtonSecondary]}
-                onPress={() => setShowManualForm(false)}
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ paddingBottom: 16 }}
               >
-                <Text style={styles.formButtonSecondaryText}>Cancel</Text>
-              </Pressable>
+                <Text style={styles.formTitle}>Add Exercise Manually</Text>
 
-              <Pressable
-                style={[
-                  styles.formButton,
-                  styles.formButtonPrimary,
-                  (!exerciseName.trim() || submitting) && styles.formButtonDisabled,
-                ]}
-                onPress={handleAddExercise}
-                disabled={!exerciseName.trim() || submitting}
-              >
-                {submitting ? (
-                  <ActivityIndicator size="small" color={colors.text.primary} />
-                ) : (
-                  <Text style={styles.formButtonPrimaryText}>Add Exercise</Text>
-                )}
-              </Pressable>
-            </View>
-          </Pressable>
+                <View style={styles.formFields}>
+                  <View style={styles.formField}>
+                    <Text style={styles.formLabel}>Exercise Name *</Text>
+                    <TextInput
+                      style={styles.formInput}
+                      value={exerciseName}
+                      onChangeText={setExerciseName}
+                      placeholder="e.g., Bench Press"
+                      placeholderTextColor={colors.text.disabled}
+                      returnKeyType="done"
+                    />
+                  </View>
+
+                  <View style={styles.formRow}>
+                    <View style={[styles.formField, { flex: 1 }]}>
+                      <Text style={styles.formLabel}>Sets</Text>
+                      <TextInput
+                        style={styles.formInput}
+                        value={targetSets}
+                        onChangeText={setTargetSets}
+                        placeholder="3"
+                        keyboardType="number-pad"
+                        placeholderTextColor={colors.text.disabled}
+                        returnKeyType="done"
+                      />
+                    </View>
+
+                    <View style={[styles.formField, { flex: 1 }]}>
+                      <Text style={styles.formLabel}>Reps</Text>
+                      <TextInput
+                        style={styles.formInput}
+                        value={targetReps}
+                        onChangeText={setTargetReps}
+                        placeholder="10"
+                        keyboardType="number-pad"
+                        placeholderTextColor={colors.text.disabled}
+                        returnKeyType="done"
+                      />
+                    </View>
+
+                    <View style={[styles.formField, { flex: 1 }]}>
+                      <Text style={styles.formLabel}>Weight (kg)</Text>
+                      <TextInput
+                        style={styles.formInput}
+                        value={targetWeight}
+                        onChangeText={setTargetWeight}
+                        placeholder="50"
+                        keyboardType="decimal-pad"
+                        placeholderTextColor={colors.text.disabled}
+                        returnKeyType="done"
+                      />
+                    </View>
+                  </View>
+                </View>
+
+                <View style={styles.formButtons}>
+                  <Pressable
+                    style={[styles.formButton, styles.formButtonSecondary]}
+                    onPress={() => setShowManualForm(false)}
+                  >
+                    <Text style={styles.formButtonSecondaryText}>Cancel</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={[
+                      styles.formButton,
+                      styles.formButtonPrimary,
+                      (!exerciseName.trim() || submitting) && styles.formButtonDisabled,
+                    ]}
+                    onPress={handleAddExercise}
+                    disabled={!exerciseName.trim() || submitting}
+                  >
+                    {submitting ? (
+                      <ActivityIndicator size="small" color={colors.text.primary} />
+                    ) : (
+                      <Text style={styles.formButtonPrimaryText}>Add Exercise</Text>
+                    )}
+                  </Pressable>
+                </View>
+              </ScrollView>
+            </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
     </View>

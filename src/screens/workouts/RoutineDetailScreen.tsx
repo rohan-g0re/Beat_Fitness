@@ -17,7 +17,7 @@ import { Card } from '@components/Card';
 import { colors } from '@theme/colors';
 import { spacing } from '@theme/spacing';
 import { typography } from '@theme/typography';
-import { getRoutine, getRoutineDays, getRoutineExercises } from '@services/supabase';
+import { getRoutine, getRoutineDays, getRoutineExercises, upsertRoutineDay } from '@services/supabase';
 import { Routine, RoutineDay } from '@types/models';
 
 type Props = NativeStackScreenProps<WorkoutsStackParamList, 'RoutineDetail'>;
@@ -72,6 +72,34 @@ export const RoutineDetailScreen = ({ route, navigation }: Props) => {
     }
   };
 
+  const createDayAndNavigate = async (dayOfWeek: number) => {
+    try {
+      // Create routine day with empty tags (DB default) if it doesn't exist
+      const { data, error } = await upsertRoutineDay({
+        routine_id: routineId,
+        day_of_week: dayOfWeek,
+        // tags omitted -> DB default '[]'
+      } as any);
+
+      if (error) {
+        console.error('Error creating routine day:', error);
+        return;
+      }
+
+      if (data) {
+        // Refresh local days list and counts
+        await loadRoutineData();
+        // Navigate to newly created day
+        navigation.navigate('DayDetail', {
+          routineId,
+          dayId: (data as any).id,
+        });
+      }
+    } catch (e) {
+      console.error('Error creating routine day:', e);
+    }
+  };
+
   // Create full week array with placeholders for missing days
   const getFullWeek = () => {
     const fullWeek: (RoutineDay | null)[] = [];
@@ -96,17 +124,14 @@ export const RoutineDetailScreen = ({ route, navigation }: Props) => {
 
       {getFullWeek().map((day, index) => {
         if (!day) {
-          // Empty day slot
+          // Empty day slot → Create on tap, then navigate
           return (
             <Card
               key={`empty-${index}`}
               title={DAY_NAMES[index]}
               subtitle="Rest day"
               variant="day"
-              onPress={() => {
-                // TODO: Create day or mark as active
-                console.log('Create day for', DAY_NAMES[index]);
-              }}
+              onPress={() => createDayAndNavigate(index)}
             />
           );
         }
