@@ -16,6 +16,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { WorkoutsStackParamList, HomeStackParamList } from '../../types/navigation';
@@ -28,6 +29,8 @@ import {
   getRoutineExercises,
   createRoutineExercise,
   getRoutineDays,
+  updateRoutineExercise,
+  deleteRoutineExercise,
 } from '@services/supabase';
 import { useRoutinesStore } from '@store/routinesStore';
 import type { RoutineExercise, RoutineDay } from '../../types/models';
@@ -43,6 +46,8 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
   const [day, setDay] = useState<RoutineDay | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showManualForm, setShowManualForm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingExercise, setEditingExercise] = useState<RoutineExercise | null>(null);
 
   // Form state
   const [exerciseName, setExerciseName] = useState('');
@@ -135,6 +140,83 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
     }
   };
 
+  const handleEditExercise = (exercise: RoutineExercise) => {
+    setEditingExercise(exercise);
+    setExerciseName(exercise.name);
+    setTargetSets(exercise.target_sets?.toString() || '');
+    setTargetReps(exercise.target_reps?.toString() || '');
+    setTargetWeight(exercise.target_weight?.toString() || '');
+    setShowEditModal(true);
+  };
+
+  const handleUpdateExercise = async () => {
+    if (!exerciseName.trim() || !editingExercise) return;
+
+    try {
+      setSubmitting(true);
+
+      const updates: any = {
+        name: exerciseName.trim(),
+        target_sets: targetSets ? parseInt(targetSets, 10) : null,
+        target_reps: targetReps ? parseInt(targetReps, 10) : null,
+        target_weight: targetWeight ? parseFloat(targetWeight) : null,
+      };
+
+      const { data, error } = await updateRoutineExercise(editingExercise.id, updates);
+
+      if (error) {
+        console.error('Error updating exercise:', error);
+        return;
+      }
+
+      if (data) {
+        // Update local state
+        setExercises(exercises.map(ex => ex.id === editingExercise.id ? data as RoutineExercise : ex));
+
+        // Reset form
+        setExerciseName('');
+        setTargetSets('');
+        setTargetReps('');
+        setTargetWeight('');
+        setEditingExercise(null);
+        setShowEditModal(false);
+      }
+    } catch (error) {
+      console.error('Error updating exercise:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteExercise = async (exerciseId: string) => {
+    Alert.alert(
+      'Delete Exercise',
+      'Are you sure you want to delete this exercise?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const { error } = await deleteRoutineExercise(exerciseId);
+
+              if (error) {
+                console.error('Error deleting exercise:', error);
+                return;
+              }
+
+              // Remove from local state
+              setExercises(exercises.filter(ex => ex.id !== exerciseId));
+            } catch (error) {
+              console.error('Error deleting exercise:', error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderBanner = () => {
     if (!day) return null;
 
@@ -205,9 +287,8 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
                   exercise.target_weight ? ` @ ${exercise.target_weight}kg` : ''
                 }`}
                 variant="exercise"
-                onPress={() => {
-                  // TODO: Navigate to exercise detail or edit
-                }}
+                showEditIcon={true}
+                onEditPress={() => handleEditExercise(exercise)}
               />
             ))
           )}
@@ -329,7 +410,7 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
                     </View>
 
                     <View style={[styles.formField, { flex: 1 }]}>
-                      <Text style={styles.formLabel}>Weight (kg)</Text>
+                      <Text style={styles.formLabel}>Target Weight</Text>
                       <TextInput
                         style={styles.formInput}
                         value={targetWeight}
@@ -367,6 +448,155 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
                     )}
                   </Pressable>
                 </View>
+              </ScrollView>
+            </Pressable>
+          </KeyboardAvoidingView>
+        </Pressable>
+      </Modal>
+
+      {/* Edit Exercise Modal */}
+      <Modal
+        visible={showEditModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => {
+          setShowEditModal(false);
+          setEditingExercise(null);
+          setExerciseName('');
+          setTargetSets('');
+          setTargetReps('');
+          setTargetWeight('');
+        }}
+      >
+        <Pressable
+          style={styles.formOverlay}
+          onPress={() => {
+            setShowEditModal(false);
+            setEditingExercise(null);
+            setExerciseName('');
+            setTargetSets('');
+            setTargetReps('');
+            setTargetWeight('');
+          }}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+          >
+            <Pressable style={styles.formContent} onPress={() => {}}>
+              <View style={styles.formHandle} />
+
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ paddingBottom: 16 }}
+              >
+                <Text style={styles.formTitle}>Edit Exercise</Text>
+
+                <View style={styles.formFields}>
+                  <View style={styles.formField}>
+                    <Text style={styles.formLabel}>Exercise Name *</Text>
+                    <TextInput
+                      style={styles.formInput}
+                      value={exerciseName}
+                      onChangeText={setExerciseName}
+                      placeholder="e.g., Bench Press"
+                      placeholderTextColor={colors.text.disabled}
+                      returnKeyType="done"
+                    />
+                  </View>
+
+                  <View style={styles.formRow}>
+                    <View style={[styles.formField, { flex: 1 }]}>
+                      <Text style={styles.formLabel}>Sets</Text>
+                      <TextInput
+                        style={styles.formInput}
+                        value={targetSets}
+                        onChangeText={setTargetSets}
+                        placeholder="3"
+                        keyboardType="number-pad"
+                        placeholderTextColor={colors.text.disabled}
+                        returnKeyType="done"
+                      />
+                    </View>
+
+                    <View style={[styles.formField, { flex: 1 }]}>
+                      <Text style={styles.formLabel}>Reps</Text>
+                      <TextInput
+                        style={styles.formInput}
+                        value={targetReps}
+                        onChangeText={setTargetReps}
+                        placeholder="10"
+                        keyboardType="number-pad"
+                        placeholderTextColor={colors.text.disabled}
+                        returnKeyType="done"
+                      />
+                    </View>
+
+                    <View style={[styles.formField, { flex: 1 }]}>
+                      <Text style={styles.formLabel}>Target Weight</Text>
+                      <TextInput
+                        style={styles.formInput}
+                        value={targetWeight}
+                        onChangeText={setTargetWeight}
+                        placeholder="50"
+                        keyboardType="decimal-pad"
+                        placeholderTextColor={colors.text.disabled}
+                        returnKeyType="done"
+                      />
+                    </View>
+                  </View>
+                </View>
+
+                <View style={styles.formButtons}>
+                  <Pressable
+                    style={[styles.formButton, styles.formButtonSecondary]}
+                    onPress={() => {
+                      setShowEditModal(false);
+                      setEditingExercise(null);
+                      setExerciseName('');
+                      setTargetSets('');
+                      setTargetReps('');
+                      setTargetWeight('');
+                    }}
+                  >
+                    <Text style={styles.formButtonSecondaryText}>Cancel</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={[
+                      styles.formButton,
+                      styles.formButtonPrimary,
+                      (!exerciseName.trim() || submitting) && styles.formButtonDisabled,
+                    ]}
+                    onPress={handleUpdateExercise}
+                    disabled={!exerciseName.trim() || submitting}
+                  >
+                    {submitting ? (
+                      <ActivityIndicator size="small" color={colors.text.primary} />
+                    ) : (
+                      <Text style={styles.formButtonPrimaryText}>Update</Text>
+                    )}
+                  </Pressable>
+                </View>
+
+                {/* Delete Button */}
+                <Pressable
+                  style={[styles.formButton, styles.deleteButton]}
+                  onPress={() => {
+                    if (editingExercise) {
+                      setShowEditModal(false);
+                      handleDeleteExercise(editingExercise.id);
+                      setEditingExercise(null);
+                      setExerciseName('');
+                      setTargetSets('');
+                      setTargetReps('');
+                      setTargetWeight('');
+                    }
+                  }}
+                >
+                  <Ionicons name="trash-outline" size={20} color={colors.error.main} />
+                  <Text style={styles.deleteButtonText}>Delete Exercise</Text>
+                </Pressable>
               </ScrollView>
             </Pressable>
           </KeyboardAvoidingView>
@@ -604,5 +834,18 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.medium,
     color: colors.text.secondary,
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    backgroundColor: colors.background.card,
+    marginTop: spacing.md,
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.error.main,
+  },
+  deleteButtonText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.error.main,
   },
 });

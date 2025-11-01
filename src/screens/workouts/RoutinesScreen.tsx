@@ -25,7 +25,7 @@ import { colors } from '@theme/colors';
 import { spacing, borderRadius } from '@theme/spacing';
 import { typography } from '@theme/typography';
 import { Ionicons } from '@expo/vector-icons';
-import { getRoutines, getRoutineDays, createRoutine } from '@services/supabase';
+import { getRoutines, getRoutineDays, createRoutine, updateRoutine, deleteRoutine } from '@services/supabase';
 import { useRoutinesStore } from '@store/routinesStore';
 import { Routine, RoutineDay } from '@types/models';
 import { useCurrentUser } from '@hooks/useCurrentUser';
@@ -40,6 +40,10 @@ export const RoutinesScreen = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [routineName, setRoutineName] = useState('');
   const [creating, setCreating] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null);
+  const [editedName, setEditedName] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const { setRoutines: setStoreRoutines, setDays, addRoutine } = useRoutinesStore();
 
   useEffect(() => {
@@ -141,6 +145,74 @@ export const RoutinesScreen = () => {
     return 7;
   };
 
+  const handleEditRoutine = (routine: Routine) => {
+    setEditingRoutine(routine);
+    setEditedName(routine.name);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateRoutine = async () => {
+    if (!editedName.trim() || !editingRoutine) return;
+
+    try {
+      setSubmitting(true);
+
+      const { data, error } = await updateRoutine(editingRoutine.id, {
+        name: editedName.trim(),
+      });
+
+      if (error) {
+        console.error('Error updating routine:', error);
+        Alert.alert('Error', 'Failed to update routine name');
+        return;
+      }
+
+      if (data) {
+        // Update local state
+        setRoutines(routines.map(r => r.id === editingRoutine.id ? data as Routine : r));
+        setShowEditModal(false);
+        setEditingRoutine(null);
+        setEditedName('');
+      }
+    } catch (error) {
+      console.error('Error updating routine:', error);
+      Alert.alert('Error', 'Failed to update routine name');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteRoutine = (routine: Routine) => {
+    Alert.alert(
+      'Delete Routine',
+      `Are you sure you want to delete "${routine.name}"? This will delete all days and exercises in it.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const { error } = await deleteRoutine(routine.id);
+
+              if (error) {
+                console.error('Error deleting routine:', error);
+                Alert.alert('Error', 'Failed to delete routine');
+                return;
+              }
+
+              // Remove from local state
+              setRoutines(routines.filter(r => r.id !== routine.id));
+            } catch (error) {
+              console.error('Error deleting routine:', error);
+              Alert.alert('Error', 'Failed to delete routine');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -177,8 +249,27 @@ export const RoutinesScreen = () => {
                 title={routine.name}
                 subtitle={`${getDayCount(routine)} days`}
                 variant="routine"
+                showEditIcon={true}
                 onPress={() => {
                   navigation.navigate('RoutineDetail', { routineId: routine.id });
+                }}
+                onEditPress={() => {
+                  Alert.alert(
+                    'Routine Options',
+                    `What would you like to do with "${routine.name}"?`,
+                    [
+                      {
+                        text: 'Edit Name',
+                        onPress: () => handleEditRoutine(routine),
+                      },
+                      {
+                        text: 'Delete Routine',
+                        style: 'destructive',
+                        onPress: () => handleDeleteRoutine(routine),
+                      },
+                      { text: 'Cancel', style: 'cancel' },
+                    ]
+                  );
                 }}
               />
             ))}
@@ -248,6 +339,80 @@ export const RoutinesScreen = () => {
                     <ActivityIndicator size="small" color={colors.text.primary} />
                   ) : (
                     <Text style={styles.modalButtonPrimaryText}>Create</Text>
+                  )}
+                </Pressable>
+              </View>
+            </Pressable>
+          </KeyboardAvoidingView>
+        </Pressable>
+      </Modal>
+
+      {/* Edit Routine Name Modal */}
+      <Modal
+        visible={showEditModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => {
+          setShowEditModal(false);
+          setEditingRoutine(null);
+          setEditedName('');
+        }}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => {
+            setShowEditModal(false);
+            setEditingRoutine(null);
+            setEditedName('');
+          }}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+          >
+            <Pressable style={styles.modalContent} onPress={() => {}}>
+              <View style={styles.modalHandle} />
+
+              <Text style={styles.modalTitle}>Edit Routine Name</Text>
+
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Routine Name *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={editedName}
+                  onChangeText={setEditedName}
+                  placeholder="e.g., Push Pull Legs"
+                  placeholderTextColor={colors.text.disabled}
+                  autoFocus
+                  returnKeyType="done"
+                />
+              </View>
+
+              <View style={styles.modalButtons}>
+                <Pressable
+                  style={[styles.modalButton, styles.modalButtonSecondary]}
+                  onPress={() => {
+                    setShowEditModal(false);
+                    setEditingRoutine(null);
+                    setEditedName('');
+                  }}
+                >
+                  <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                </Pressable>
+
+                <Pressable
+                  style={[
+                    styles.modalButton,
+                    styles.modalButtonPrimary,
+                    (!editedName.trim() || submitting) && styles.modalButtonDisabled,
+                  ]}
+                  onPress={handleUpdateRoutine}
+                  disabled={!editedName.trim() || submitting}
+                >
+                  {submitting ? (
+                    <ActivityIndicator size="small" color={colors.text.primary} />
+                  ) : (
+                    <Text style={styles.modalButtonPrimaryText}>Save</Text>
                   )}
                 </Pressable>
               </View>

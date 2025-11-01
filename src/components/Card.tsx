@@ -12,6 +12,7 @@ import {
   Pressable,
   ImageSourcePropType,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@theme/colors';
 import { spacing, borderRadius } from '@theme/spacing';
 import { typography } from '@theme/typography';
@@ -26,6 +27,8 @@ interface CardProps {
   variant?: CardVariant;
   onPress?: () => void;
   disabled?: boolean;
+  showEditIcon?: boolean;
+  onEditPress?: () => void;
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -36,6 +39,8 @@ export const Card: React.FC<CardProps> = ({
   variant = 'routine',
   onPress,
   disabled = false,
+  showEditIcon = false,
+  onEditPress,
 }) => {
   const hasImage = !!image;
 
@@ -81,6 +86,20 @@ export const Card: React.FC<CardProps> = ({
           </View>
         )}
       </View>
+
+      {/* Edit Icon */}
+      {showEditIcon && onEditPress && (
+        <Pressable
+          style={styles.editButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            onEditPress();
+          }}
+          hitSlop={8}
+        >
+          <Ionicons name="pencil" size={20} color={colors.primary[500]} />
+        </Pressable>
+      )}
     </Pressable>
   );
 };
@@ -91,12 +110,29 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     marginBottom: spacing.md,
     overflow: 'hidden',
+    position: 'relative',
   },
   pressed: {
     opacity: 0.7,
   },
   disabled: {
     opacity: 0.5,
+  },
+  editButton: {
+    position: 'absolute',
+    top: spacing.md,
+    right: spacing.md,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.md,
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   imageContainer: {
     width: '100%',
