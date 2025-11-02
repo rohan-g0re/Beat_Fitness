@@ -222,6 +222,19 @@ export const RoutinesScreen = () => {
     );
   }
 
+  // Generate gradient colors for each routine
+  const getRoutineGradient = (index: number): string[] => {
+    const gradients = [
+      ['#1E3A8A', '#3B82F6'], // Blue
+      ['#7C3AED', '#A78BFA'], // Purple
+      ['#DC2626', '#F87171'], // Red
+      ['#059669', '#34D399'], // Green
+      ['#EA580C', '#FB923C'], // Orange
+      ['#0891B2', '#22D3EE'], // Cyan
+    ];
+    return gradients[index % gradients.length];
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -229,28 +242,33 @@ export const RoutinesScreen = () => {
 
         {routines.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="barbell-outline" size={64} color={colors.text.disabled} />
+            <View style={styles.emptyIconContainer}>
+              <Ionicons name="barbell-outline" size={80} color={colors.primary[500]} />
+            </View>
             <Text style={styles.emptyTitle}>No routines yet</Text>
             <Text style={styles.emptySubtext}>
-              Create your first workout routine to get started
+              Create your first workout routine to get started on your fitness journey
             </Text>
             <Pressable
               style={styles.createButton}
               onPress={() => setShowCreateModal(true)}
             >
-              <Ionicons name="add" size={20} color={colors.text.primary} />
+              <Ionicons name="add" size={24} color={colors.text.primary} />
               <Text style={styles.createButtonText}>Create Routine</Text>
             </Pressable>
           </View>
         ) : (
           <>
-            {routines.map((routine) => (
+            {routines.map((routine, index) => (
               <Card
                 key={routine.id}
                 title={routine.name}
-                subtitle={`${getDayCount(routine)} days`}
+                subtitle={`${getDayCount(routine)} days planned`}
                 variant="routine"
                 showEditIcon={true}
+                gradient={getRoutineGradient(index)}
+                icon="fitness"
+                iconColor={colors.text.primary}
                 onPress={() => {
                   navigation.navigate('RoutineDetail', { routineId: routine.id });
                 }}
@@ -279,7 +297,7 @@ export const RoutinesScreen = () => {
               style={styles.addButton}
               onPress={() => setShowCreateModal(true)}
             >
-              <Ionicons name="add" size={20} color={colors.primary[500]} />
+              <Ionicons name="add-circle-outline" size={28} color={colors.primary[500]} />
               <Text style={styles.addButtonText}>Add Another Routine</Text>
             </Pressable>
           </>
@@ -437,42 +455,56 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    paddingHorizontal: 32,
-    paddingTop: 24,
-    paddingBottom: 32,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing['2xl'],
   },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: spacing['4xl'],
+    paddingHorizontal: spacing.xl,
+  },
+  emptyIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: `${colors.primary[500]}20`,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.xl,
   },
   emptyTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.semiBold,
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    marginTop: spacing.lg,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.md,
   },
   emptySubtext: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.lg,
     color: colors.text.secondary,
     textAlign: 'center',
-    marginBottom: spacing.xl,
-    paddingHorizontal: spacing.xl,
+    marginBottom: spacing['2xl'],
+    lineHeight: 24,
   },
   createButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.primary[500],
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
-    gap: spacing.sm,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.lg,
+    borderRadius: borderRadius.lg,
+    gap: spacing.md,
+    shadowColor: colors.primary[500],
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
   },
   createButtonText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semiBold,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
   },
   addButton: {
@@ -480,14 +512,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.background.elevated,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
+    paddingVertical: spacing.lg,
+    borderRadius: borderRadius.lg,
     marginTop: spacing.md,
-    gap: spacing.sm,
+    gap: spacing.md,
+    borderWidth: 2,
+    borderColor: colors.primary[500],
+    borderStyle: 'dashed',
   },
   addButtonText: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semiBold,
     color: colors.primary[500],
   },
   modalOverlay: {
