@@ -234,6 +234,16 @@ export const RoutineDetailScreen = ({ route, navigation }: Props) => {
     );
   }
 
+  // Get icon for day based on exercises or muscle groups
+  const getDayIcon = (day: RoutineDay | null): 'barbell' | 'dumbbell' | 'fitness' | 'body' => {
+    if (!day || day.tags.length === 0) return 'fitness';
+    const firstTag = day.tags[0].toLowerCase();
+    if (firstTag.includes('chest') || firstTag.includes('back')) return 'barbell';
+    if (firstTag.includes('arms') || firstTag.includes('shoulder')) return 'dumbbell';
+    if (firstTag.includes('legs')) return 'body';
+    return 'fitness';
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -246,26 +256,33 @@ export const RoutineDetailScreen = ({ route, navigation }: Props) => {
               <Card
                 key={`empty-${index}`}
                 title={DAY_NAMES[index]}
-                subtitle="Rest day"
+                subtitle="Tap to add exercises"
                 variant="day"
+                icon="fitness"
+                iconColor={colors.gray[600]}
+                isRestDay={true}
                 onPress={() => createDayAndNavigate(index)}
               />
             );
           }
 
           const exerciseCount = exerciseCounts[day.id] || 0;
+          const hasExercises = exerciseCount > 0;
 
           return (
             <Card
               key={day.id}
               title={DAY_NAMES[day.day_of_week]}
               subtitle={
-                exerciseCount > 0
+                hasExercises
                   ? `${exerciseCount} exercise${exerciseCount !== 1 ? 's' : ''}`
-                  : 'No exercises yet'
+                  : 'Tap to add exercises'
               }
               tags={day.tags}
               variant="day"
+              icon={getDayIcon(day)}
+              iconColor={hasExercises ? colors.primary[500] : colors.gray[600]}
+              hasExercises={hasExercises}
               onPress={() => {
                 navigation.navigate('DayDetail', {
                   routineId,
@@ -351,12 +368,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    padding: spacing.md,
+    padding: spacing.lg,
+    paddingBottom: spacing['2xl'],
   },
   subtitle: {
-    fontSize: typography.fontSize.base,
+    fontSize: typography.fontSize.lg,
     color: colors.text.secondary,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
+    lineHeight: 24,
   },
   modalOverlay: {
     flex: 1,

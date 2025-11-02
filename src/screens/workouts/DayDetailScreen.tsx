@@ -13,12 +13,12 @@ import {
   Pressable,
   TextInput,
   ActivityIndicator,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Alert,
   TouchableOpacity,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { WorkoutsStackParamList, HomeStackParamList } from '../../types/navigation';
 import { Card } from '@components/Card';
@@ -300,38 +300,51 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
     }
   };
 
+  // Get exercise icon based on name
+  const getExerciseIcon = (name: string): 'barbell' | 'dumbbell' | 'fitness' | 'body' => {
+    const lowerName = name.toLowerCase();
+    if (lowerName.includes('squat') || lowerName.includes('deadlift') || lowerName.includes('bench')) return 'barbell';
+    if (lowerName.includes('curl') || lowerName.includes('press') || lowerName.includes('raise')) return 'dumbbell';
+    if (lowerName.includes('plank') || lowerName.includes('push') || lowerName.includes('pull')) return 'body';
+    return 'fitness';
+  };
+
+  // Get muscle group color for banner gradient
+  const getBannerGradient = (): [string, string] => {
+    if (!day || day.tags.length === 0) return ['#1E3A8A', '#3B82F6'];
+    const firstTag = day.tags[0].toLowerCase();
+    if (firstTag.includes('chest')) return ['#DC2626', '#F87171'];
+    if (firstTag.includes('back')) return ['#0891B2', '#22D3EE'];
+    if (firstTag.includes('legs')) return ['#7C3AED', '#A78BFA'];
+    if (firstTag.includes('shoulder')) return ['#EA580C', '#FB923C'];
+    if (firstTag.includes('arms')) return ['#3B82F6', '#60A5FA'];
+    if (firstTag.includes('core')) return ['#F59E0B', '#FCD34D'];
+    return ['#1E3A8A', '#3B82F6'];
+  };
+
   const renderBanner = () => {
     if (!day) return null;
 
-    // TODO: Replace with actual images from Figma or user-uploaded images
-    // For now, using gradient backgrounds based on muscle groups
-    const getBannerImage = () => {
-      // Placeholder: You can add actual images here
-      // return require('@assets/images/workout-banner.jpg');
-      return null;
-    };
-
     return (
-      <View style={styles.banner}>
-        {getBannerImage() ? (
-          <Image
-            source={getBannerImage()!}
-            style={styles.bannerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={styles.bannerPlaceholder} />
-        )}
+      <LinearGradient 
+        colors={getBannerGradient()}
+        style={styles.banner}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
         <View style={styles.bannerOverlay}>
-          <View style={styles.tagsContainer}>
-            {day.tags.map((tag, index) => (
-              <View key={index} style={styles.tagPill}>
-                <Text style={styles.tagText}>{tag}</Text>
-              </View>
-            ))}
+          <View style={styles.bannerContent}>
+            <Text style={styles.bannerTitle}>{getDayName(day.day_of_week)}</Text>
+            <View style={styles.tagsContainer}>
+              {day.tags.map((tag, index) => (
+                <View key={index} style={styles.tagPill}>
+                  <Text style={styles.tagText}>{tag}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
-      </View>
+      </LinearGradient>
     );
   };
 
@@ -351,14 +364,23 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
 
         {/* Exercise List */}
         <View style={styles.exercisesContainer}>
-          <Text style={styles.sectionTitle}>Exercises</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Exercises</Text>
+            {exercises.length > 0 && (
+              <View style={styles.exerciseCount}>
+                <Text style={styles.exerciseCountText}>{exercises.length}</Text>
+              </View>
+            )}
+          </View>
           
           {exercises.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="barbell-outline" size={48} color={colors.text.disabled} />
+              <View style={styles.emptyIconContainer}>
+                <Ionicons name="barbell-outline" size={64} color={colors.primary[500]} />
+              </View>
               <Text style={styles.emptyText}>No exercises yet</Text>
               <Text style={styles.emptySubtext}>
-                Tap the + button to add exercises
+                Tap the + button below to add your first exercise
               </Text>
             </View>
           ) : (
@@ -370,6 +392,8 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
                   exercise.target_weight ? ` @ ${exercise.target_weight}kg` : ''
                 }`}
                 variant="exercise"
+                icon={getExerciseIcon(exercise.name)}
+                iconColor={colors.primary[500]}
                 showEditIcon={true}
                 onEditPress={() => handleEditExercise(exercise)}
               />
@@ -382,22 +406,42 @@ export const DayDetailScreen = ({ route, navigation }: Props) => {
           <View style={styles.workoutButtonContainer}>
             {activeSession?.routineDayId === dayId ? (
               <TouchableOpacity
-                style={styles.startWorkoutButton}
+                style={styles.startWorkoutButtonWrapper}
                 onPress={handleResumeWorkout}
+                activeOpacity={0.8}
               >
-                <Text style={styles.startWorkoutButtonText}>Resume Workout</Text>
+                <LinearGradient
+                  colors={['#34D399', '#059669']}
+                  style={styles.startWorkoutButton}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <Ionicons name="play-circle-outline" size={24} color="#000000" />
+                  <Text style={styles.startWorkoutButtonText}>Resume Workout</Text>
+                </LinearGradient>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                style={[styles.startWorkoutButton, startingWorkout && { opacity: 0.6 }]}
+                style={[styles.startWorkoutButtonWrapper, startingWorkout && { opacity: 0.6 }]}
                 onPress={handleStartWorkout}
                 disabled={startingWorkout}
+                activeOpacity={0.8}
               >
-                {startingWorkout ? (
-                  <ActivityIndicator color="#000000" />
-                ) : (
-                  <Text style={styles.startWorkoutButtonText}>Start Workout</Text>
-                )}
+                <LinearGradient
+                  colors={['#3B82F6', '#1E3A8A']}
+                  style={styles.startWorkoutButton}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  {startingWorkout ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <Ionicons name="barbell-outline" size={24} color="#FFFFFF" />
+                      <Text style={styles.startWorkoutButtonText}>Start Workout</Text>
+                    </>
+                  )}
+                </LinearGradient>
               </TouchableOpacity>
             )}
           </View>
@@ -730,34 +774,26 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
   banner: {
-    height: 200,
-    backgroundColor: colors.background.card,
+    height: 220,
     justifyContent: 'flex-end',
     position: 'relative',
   },
-  bannerImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
-  },
-  bannerPlaceholder: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: colors.background.card,
-  },
   bannerOverlay: {
-    padding: spacing.md,
+    padding: spacing.lg,
     position: 'relative',
     zIndex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  },
+  bannerContent: {
+    gap: spacing.md,
+  },
+  bannerTitle: {
+    fontSize: typography.fontSize['3xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -765,38 +801,68 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   tagPill: {
-    backgroundColor: colors.primary[900],
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   tagText: {
-    color: colors.primary[300],
+    color: colors.text.primary,
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semiBold,
+    fontWeight: typography.fontWeight.bold,
   },
   exercisesContainer: {
-    padding: spacing.md,
+    padding: spacing.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
   },
   sectionTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.semiBold,
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    marginBottom: spacing.md,
+  },
+  exerciseCount: {
+    backgroundColor: colors.primary[500],
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  exerciseCountText: {
+    color: colors.text.primary,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
   },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: spacing['3xl'],
+    paddingVertical: spacing['4xl'],
+  },
+  emptyIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: `${colors.primary[500]}20`,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.xl,
   },
   emptyText: {
-    fontSize: typography.fontSize.lg,
-    color: colors.text.secondary,
-    marginTop: spacing.md,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.semiBold,
+    color: colors.text.primary,
+    marginBottom: spacing.sm,
   },
   emptySubtext: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.disabled,
-    marginTop: spacing.xs,
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    textAlign: 'center',
   },
   fab: {
     position: 'absolute',
@@ -959,19 +1025,29 @@ const styles = StyleSheet.create({
   },
   workoutButtonContainer: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xl,
+  },
+  startWorkoutButtonWrapper: {
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
   },
   startWorkoutButton: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 18,
-    borderRadius: 4,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.lg,
+    gap: spacing.md,
   },
   startWorkoutButtonText: {
-    color: '#000000',
-    fontSize: 16,
-    fontWeight: '600',
+    color: '#FFFFFF',
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
     letterSpacing: 0.5,
   },
 });
